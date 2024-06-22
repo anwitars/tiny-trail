@@ -12,15 +12,18 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Input JSON for the shorten endpoint.
 type ShortenRequest struct {
 	URL string `json:"url"`
 }
 
+// Output JSON for the shorten endpoint.
 type ShortenedURL struct {
 	OriginalURL string `json:"original_url"`
 	ShortID     string `json:"short_id"`
 }
 
+// Shortens a URL and returns a short URL.
 func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value("db").(*sqlx.DB)
 	var req ShortenRequest
@@ -45,6 +48,7 @@ func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(shortenedURL.ShortID))
 }
 
+// Generates a short URL based on a UUID.
 func generateShortURL() string {
 	u := uuid.New()
 	hash := sha256.Sum256([]byte(u.String()))

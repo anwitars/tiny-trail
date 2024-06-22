@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+	//* Command line arguments and flags *
 	port := flag.Int("port", 8080, "Port to run the server on")
 	flag.Parse()
 
@@ -21,6 +22,7 @@ func main() {
 		return
 	}
 
+	//* Load configuration and create database pool *
 	appConfig, err := config.LoadConfig()
 	if err != nil {
 		slog.Error("Error loading config: %v", err)
@@ -42,6 +44,7 @@ func main() {
 		DB: db,
 	}
 
+	//* Register endpoints and start server *
 	server.RegisterEndpoints(appContext)
 
 	slog.Info(fmt.Sprintf("Starting server on port %d", *port))

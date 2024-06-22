@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// Middleware to inject the database connection pool into the request context.
 func WithDatabase(db *sqlx.DB) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

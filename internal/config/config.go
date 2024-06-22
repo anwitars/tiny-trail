@@ -9,10 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// AppConfig holds the configuration of the application.
+// This is the layout of the config.yaml file.
 type AppConfig struct {
 	DatabaseURL string `yaml:"database"`
 }
 
+// LoadConfig loads the configuration from the config.yaml file.
 func LoadConfig() (*AppConfig, error) {
 	configDir := environment.GetConfigDir()
 	if configDir == "" {

@@ -7,6 +7,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Redirects the user to the original URL based on the shortened URL ID.
 func RedirectEndpoint(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value("db").(*sqlx.DB)
 	shortenedURLID := r.PathValue("shortenedURLID")
