@@ -7,6 +7,9 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type ShortenRequest struct {
@@ -18,10 +21,8 @@ type ShortenedURL struct {
 	ShortID     string `json:"short_id"`
 }
 
-// TODO: database
-var shortenedURLs []ShortenedURL
-
 func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
+	db := r.Context().Value("db").(*sqlx.DB)
 	var req ShortenRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -35,7 +36,11 @@ func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
 		ShortID:     generateShortURL(),
 	}
 
-	shortenedURLs = append(shortenedURLs, shortenedURL)
+	_, err = db.Exec("INSERT INTO shortened_urls (short_id, original_url) VALUES ($1, $2)", shortenedURL.ShortID, shortenedURL.OriginalURL)
+	if err != nil {
+		http.Error(w, "Error inserting into database: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Write([]byte(shortenedURL.ShortID))
 }
