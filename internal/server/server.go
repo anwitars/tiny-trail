@@ -37,4 +37,6 @@ func RegisterEndpoints(appContext *AppContext) {
 	registerEndpoint("/", http.HandlerFunc(endpoints.HelloEndpoint), middlewares.Logger)
 
 	registerEndpoint("POST /shorten", appContext.HandleWithDB(http.HandlerFunc(endpoints.ShortenEndpoint)), middlewares.Logger)
+
+	registerEndpoint("GET /t/{shortenedURLID}", appContext.HandleWithDB(http.HandlerFunc(endpoints.RedirectEndpoint)), middlewares.Logger)
 }
