@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"tinytrail/internal/config"
@@ -11,6 +13,14 @@ import (
 )
 
 func main() {
+	port := flag.Int("port", 8080, "Port to run the server on")
+	flag.Parse()
+
+	if *port < 1 || *port > 65535 {
+		slog.Error(fmt.Sprintf("Invalid port: %d", *port))
+		return
+	}
+
 	appConfig, err := config.LoadConfig()
 	if err != nil {
 		slog.Error("Error loading config: %v", err)
@@ -34,7 +44,8 @@ func main() {
 
 	server.RegisterEndpoints(appContext)
 
-	slog.Info("Starting server on port 8080")
+	slog.Info(fmt.Sprintf("Starting server on port %d", *port))
 
-	http.ListenAndServe(":8080", nil)
+	address := fmt.Sprintf(":%d", *port)
+	http.ListenAndServe(address, nil)
 }
