@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"net/http"
 	"tinytrail/internal/endpoints"
 	"tinytrail/internal/middlewares"
@@ -11,16 +10,6 @@ import (
 
 type AppContext struct {
 	DB *sqlx.DB
-}
-
-func (appContext *AppContext) HandleWithDB(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, "db", appContext.DB)
-		r = r.WithContext(ctx)
-
-		handler.ServeHTTP(w, r)
-	})
 }
 
 func registerEndpoint(pattern string, handler http.Handler, middlewares ...middlewares.Middleware) {
@@ -34,9 +23,9 @@ func registerEndpoint(pattern string, handler http.Handler, middlewares ...middl
 }
 
 func RegisterEndpoints(appContext *AppContext) {
+	withDatabaseMiddleware := middlewares.WithDatabase(appContext.DB)
+
 	registerEndpoint("/", http.HandlerFunc(endpoints.HelloEndpoint), middlewares.Logger)
-
-	registerEndpoint("POST /shorten", appContext.HandleWithDB(http.HandlerFunc(endpoints.ShortenEndpoint)), middlewares.Logger)
-
-	registerEndpoint("GET /t/{shortenedURLID}", appContext.HandleWithDB(http.HandlerFunc(endpoints.RedirectEndpoint)), middlewares.Logger)
+	registerEndpoint("POST /shorten", http.HandlerFunc(endpoints.ShortenEndpoint), middlewares.Logger, withDatabaseMiddleware)
+	registerEndpoint("GET /t/{shortenedURLID}", http.HandlerFunc(endpoints.RedirectEndpoint), middlewares.Logger, withDatabaseMiddleware)
 }
