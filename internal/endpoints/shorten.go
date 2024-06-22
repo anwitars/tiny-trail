@@ -1,9 +1,12 @@
 package endpoints
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
-	"math/rand"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type ShortenRequest struct {
@@ -37,12 +40,9 @@ func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(shortenedURL.ShortID))
 }
 
-// TODO: better short URL generation
 func generateShortURL() string {
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, 6)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
+	u := uuid.New()
+	hash := sha256.Sum256([]byte(u.String()))
+	shortURL := base64.URLEncoding.EncodeToString(hash[:])[:8]
+	return shortURL
 }
