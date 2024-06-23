@@ -1,8 +1,30 @@
-CREATE TABLE shortened_urls (
-  id SERIAL PRIMARY KEY,
-  original_url TEXT NOT NULL,
-  short_id TEXT NOT NULL UNIQUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE INDEX shortened_urls_short_id_idx ON shortened_urls (short_id);
+CREATE OR REPLACE FUNCTION generate_short_trail_id() RETURNS TEXT AS $$
+DECLARE
+  u UUID;
+  hash BYTEA;
+  short_id TEXT;
+BEGIN
+  LOOP
+    u = uuid_generate_v4();
+    hash = digest(u::TEXT, 'sha256');
+    short_id = encode(hash, 'base64')::TEXT;
+    short_id = replace(short_id, '/', '_');
+    short_id = replace(short_id, '+', '-');
+    short_id = replace(short_id, '=', '');
+    short_id = left(short_id, 8);
+
+    IF NOT EXISTS (SELECT 1 FROM trails WHERE id = short_id) THEN
+      RETURN short_id;
+    END IF;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TABLE trails (
+  id TEXT NOT NULL PRIMARY KEY DEFAULT generate_short_trail_id(),
+  original_url TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,12 +1,8 @@
 package endpoints
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"net/http"
-
-	"github.com/google/uuid"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -36,22 +32,13 @@ func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	shortenedURL := ShortenedURL{
 		OriginalURL: req.URL,
-		ShortID:     generateShortURL(),
 	}
 
-	_, err = db.Exec("INSERT INTO shortened_urls (short_id, original_url) VALUES ($1, $2)", shortenedURL.ShortID, shortenedURL.OriginalURL)
+	err = db.QueryRowx("INSERT INTO trails (original_url) VALUES ($1) RETURNING id", shortenedURL.OriginalURL).Scan(&shortenedURL.ShortID)
 	if err != nil {
 		http.Error(w, "Error inserting into database: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Write([]byte(shortenedURL.ShortID))
-}
-
-// Generates a short URL based on a UUID.
-func generateShortURL() string {
-	u := uuid.New()
-	hash := sha256.Sum256([]byte(u.String()))
-	shortURL := base64.URLEncoding.EncodeToString(hash[:])[:8]
-	return shortURL
 }

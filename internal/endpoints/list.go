@@ -12,7 +12,7 @@ import (
 func ListEndpoint(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value("db").(*sqlx.DB)
 
-	rows, err := db.Query("SELECT original_url, short_id FROM shortened_urls")
+	rows, err := db.Query("SELECT original_url, id FROM trails")
 	if err != nil {
 		http.Error(w, "Error querying database: "+err.Error(), http.StatusInternalServerError)
 		return

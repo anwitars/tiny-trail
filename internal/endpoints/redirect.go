@@ -14,11 +14,16 @@ func RedirectEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 
-	var originalURL string
-	err := db.Get(&originalURL, "SELECT original_url FROM shortened_urls WHERE short_id = $1", shortenedURLID)
+	originalURL := ""
 
-	if err == nil {
-		http.Redirect(w, r, originalURL, http.StatusFound)
+	err := db.Get(&originalURL, "SELECT original_url FROM trails WHERE id = $1", shortenedURLID)
+	if err != nil {
+		http.Error(w, "Error querying database: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if originalURL == "" {
+		http.Error(w, "URL not found", http.StatusNotFound)
 		return
 	}
 
