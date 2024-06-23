@@ -20,7 +20,7 @@ type ShortenedURL struct {
 }
 
 // Shortens a URL and returns a short URL.
-func ShortenEndpoint(w http.ResponseWriter, r *http.Request) {
+func NewTrailEndpoint(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value("db").(*sqlx.DB)
 	var req ShortenRequest
 

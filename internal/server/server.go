@@ -30,7 +30,7 @@ func registerEndpoint(pattern string, handler http.Handler, middlewares ...middl
 func RegisterEndpoints(appContext *AppContext) {
 	withDatabaseMiddleware := middlewares.WithDatabase(appContext.DB)
 
-	registerEndpoint("POST /shorten", http.HandlerFunc(endpoints.ShortenEndpoint), middlewares.Logger, withDatabaseMiddleware)
+	registerEndpoint("POST /new", http.HandlerFunc(endpoints.NewTrailEndpoint), middlewares.Logger, withDatabaseMiddleware)
 	registerEndpoint("GET /t/{shortenedURLID}", http.HandlerFunc(endpoints.RedirectEndpoint), middlewares.Logger, withDatabaseMiddleware)
 	registerEndpoint("GET /list", http.HandlerFunc(endpoints.ListEndpoint), middlewares.Logger, withDatabaseMiddleware)
 }
