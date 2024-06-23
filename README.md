@@ -8,6 +8,6 @@ Tiny Trail is a URL shortening service that allows users to shorten long URLs in
 
 ## Roadmap
 
-- [ ] Trail expiration
+- [x] Trail expiration
 - [ ] User authentication
 - [ ] Telemetry for each trail
