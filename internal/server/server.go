@@ -16,14 +16,8 @@ type AppContext struct {
 
 // Register an endpoint with a pattern, handler and optional middlewares.
 // The middlewares are applied in the order they are passed.
-func registerEndpoint(pattern string, handler http.Handler, middlewares ...middlewares.Middleware) {
-	h := handler
-
-	for _, m := range middlewares {
-		h = m(h)
-	}
-
-	http.Handle(pattern, h)
+func registerEndpoint(pattern string, handler http.Handler, mwares ...middlewares.Middleware) {
+	http.Handle(pattern, middlewares.Apply(handler, mwares...))
 }
 
 // Register all endpoints that is used in the application.
