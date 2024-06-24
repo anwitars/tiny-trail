@@ -11,19 +11,32 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var dbConn *sqlx.DB
+var (
+	dbConn     *sqlx.DB
+	TestConfig *config.AppConfig
+)
 
-func initTestDB() (*sqlx.DB, error) {
+func LoadTestConfig() *config.AppConfig {
+	if TestConfig != nil {
+		return TestConfig
+	}
+
 	configDir := os.Getenv(environment.WithPrefix("TEST_CONFIG_DIR"))
 	if configDir == "" {
-		return nil, errors.New(fmt.Sprintf("%s environment variable is not set", environment.WithPrefix("TEST_CONFIG_DIR")))
+		panic(errors.New(fmt.Sprintf("%s environment variable is not set", environment.WithPrefix("TEST_CONFIG_DIR"))))
 	}
 
 	config, err := config.LoadConfig(configDir)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
+	TestConfig = config
+	return TestConfig
+}
+
+func initTestDB() (*sqlx.DB, error) {
+	config := LoadTestConfig()
 	db, err := sqlx.Connect("postgres", config.DatabaseURL)
 	if err != nil {
 		return nil, err

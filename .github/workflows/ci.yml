@@ -1,0 +1,45 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: self-hosted
+    services:
+      tiny_trail_ci_postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5429:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.22
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Create test database if not exists
+        env:
+          PGPASSWORD: postgres
+        run: |
+          docker exec tiny_trail_ci_postgres psql -U postgres -c "SELECT 'CREATE DATABASE tinytrail_test' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'tinytrail_test')" || true
+
+      - name: Run tests
+        env:
+          TINY_TRAIL_TEST_CONFIG_DIR: ${{ github.workspace }}/test/ci_app_config
+        run: go test -v ./...
+

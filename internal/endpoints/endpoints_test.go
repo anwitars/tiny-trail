@@ -3,6 +3,7 @@ package endpoints_test
 import (
 	"os"
 	"testing"
+	"tinytrail/test/utils"
 
 	migrate "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -18,24 +19,23 @@ func TestMain(m *testing.M) {
 }
 
 func setup() {
+	config := utils.LoadTestConfig()
 	m, err := migrate.New(
 		"file://../../migrations",
-		"postgresql://postgres:postgres@localhost:5122/tinytrail_test",
+		config.DatabaseURL,
 	)
 	if err != nil {
 		panic(err)
 	}
 
 	m.Up()
-	// if err = m.Up(); err != nil {
-	// 	panic(err)
-	// }
 }
 
 func teardown() {
+	config := utils.LoadTestConfig()
 	m, err := migrate.New(
 		"file://../../migrations",
-		"postgresql://postgres:postgres@localhost:5122/tinytrail_test",
+		config.DatabaseURL,
 	)
 	if err != nil {
 		panic(err)

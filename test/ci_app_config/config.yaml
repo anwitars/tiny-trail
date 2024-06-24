@@ -1,0 +1,1 @@
+database: postgresql://postgres:postgres@127.0.0.1:5429/tinytrail_test
