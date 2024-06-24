@@ -12,7 +12,7 @@ import (
 func ListEndpoint(w http.ResponseWriter, r *http.Request) {
 	db := r.Context().Value("db").(*sqlx.DB)
 
-	rows, err := db.Query("SELECT original_url, id FROM trails")
+	rows, err := db.Query("SELECT original_url, id, expiration FROM trails")
 	if err != nil {
 		http.Error(w, "Error querying database: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -21,7 +21,7 @@ func ListEndpoint(w http.ResponseWriter, r *http.Request) {
 	shortenedURLs := []ShortenedURL{}
 	for rows.Next() {
 		var shortenedURL ShortenedURL
-		err := rows.Scan(&shortenedURL.OriginalURL, &shortenedURL.ShortID)
+		err := rows.Scan(&shortenedURL.OriginalURL, &shortenedURL.ShortID, &shortenedURL.Expiration)
 		if err != nil {
 			http.Error(w, "Error scanning row: "+err.Error(), http.StatusInternalServerError)
 			return
