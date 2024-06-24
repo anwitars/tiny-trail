@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"tinytrail/internal/config"
+	"tinytrail/internal/environment"
 	"tinytrail/internal/server"
 
 	"github.com/jmoiron/sqlx"
@@ -22,8 +23,14 @@ func main() {
 		return
 	}
 
+	configDir := environment.GetConfigDir()
+	if configDir == "" {
+		slog.Error("CONFIG_DIR env variable is not set")
+		return
+	}
+
 	//* Load configuration and create database pool *
-	appConfig, err := config.LoadConfig()
+	appConfig, err := config.LoadConfig(configDir)
 	if err != nil {
 		slog.Error("Error loading config: %v", err)
 		return

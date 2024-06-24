@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"tinytrail/internal/environment"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,12 +15,7 @@ type AppConfig struct {
 }
 
 // LoadConfig loads the configuration from the config.yaml file.
-func LoadConfig() (*AppConfig, error) {
-	configDir := environment.GetConfigDir()
-	if configDir == "" {
-		return nil, fmt.Errorf("CONFIG_DIR env variable is not set")
-	}
-
+func LoadConfig(configDir string) (*AppConfig, error) {
 	configPath := path.Join(configDir, "config.yaml")
 	var config AppConfig
 
